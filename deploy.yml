@@ -13,10 +13,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Decode kubeconfig and write to file
-        run: echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig
-
-      - name: Debug kubeconfig content
-        run: cat kubeconfig # Optioneel voor debugging
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig
+          cat kubeconfig # Debug om te controleren of de kubeconfig correct is geschreven
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
@@ -26,7 +25,7 @@ jobs:
       - name: Validate Kubernetes config
         env:
           KUBECONFIG: ${{ github.workspace }}/kubeconfig
-        run: kubectl get nodes
+        run: kubectl get nodes # Controleer toegang tot het cluster
 
       - name: Deploy to Kubernetes
         env:
