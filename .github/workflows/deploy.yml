@@ -1,21 +1,36 @@
-name: Deploy to Kubernetes
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main
+      - main  # Start de pipeline bij een push naar de main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
+    steps:
+      # 1. Code ophalen
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # 2. Kubernetes configuratie instellen
       - name: Set up Kubeconfig
         run: |
           mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > $HOME/.kube/config
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
 
-      - name: Apply Kubernetes manifests
-        run: kubectl apply -f nginx.yaml
+      # 3. Kubectl installeren
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'v1.28.0'
+
+      # 4. Validatie van Kubernetes manifests
+      - name: Validate Kubernetes manifests
+        run: kubectl apply --dry-run=client -f ./k8s-manifests/
+
+      # 5. Deployen naar Kubernetes
+      - name: Deploy to Kubernetes
+        run: kubectl apply -f ./k8s-manifests/
