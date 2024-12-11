@@ -12,11 +12,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Write kubeconfig file
+      - name: Decode kubeconfig and write to file
         run: echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig
 
       - name: Debug kubeconfig content
-        run: cat kubeconfig
+        run: cat kubeconfig # Optioneel voor debugging
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
@@ -32,3 +32,4 @@ jobs:
         env:
           KUBECONFIG: ${{ github.workspace }}/kubeconfig
         run: kubectl apply -f nginx.yaml
+
